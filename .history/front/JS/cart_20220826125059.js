@@ -16,15 +16,12 @@ function innerHTML() {
         //la deuxième boucle va au deuxième niveau
         //On récupère la couleur et la quantité
         for (let [color, quantity] of Object.entries(colors)) {
-            console.log(color)
             fetch("http://localhost:3000/api/products/" + id)
                 .then((response) => {
                     if (response.ok) {
-                        return response.json()
-                            //faire un return      response.json()
-                            //ferme le if, fermer then
+                        response.json()
                             .then((productData) => {
-                                console.log(productData)
+
                                 let item = document.querySelector("#cart__items")
                                     // Insertion des éléments
                                     // document.createelement
@@ -99,9 +96,12 @@ function innerHTML() {
 
 
                             })
+
+
                     }
                 })
         }
+
     }
 }
 
@@ -178,14 +178,17 @@ const validInfo = function(inputInfo) {
     let testInfo = infoRegExp.test(inputInfo.value)
     let errorMessage = inputInfo.nextElementSibling
 
+
     //if (inputInfo.value === "") {
     errorMessage.innerHTML = ""
-        //}
-    if (!testInfo || inputInfo.value.length < 1) {
+
+    //}
+    if (testInfo === false) {
         errorMessage.style.color = "FF8686E5"
         errorMessage.innerHTML = "❌ Nombre ou symbole non autorisé"
         return false;
-    } else {
+
+    } else(testInfo === true) {
         //errorMessage.innerHTML = ""
         return true;
     }
@@ -199,6 +202,10 @@ const validInfo = function(inputInfo) {
 // On crée la fonction qui nous permet de renvoyer un objet au backend, qui contient
 // Un tableau product et l'objet contact
 function makeJsonData() {
+    if (!validInfo()) {
+        alert("le formlaire n'est pas correctement remplis");
+        return;
+    }
     let contact = {
         firstName: firstName.value,
         lastName: lastName.value,
@@ -206,16 +213,6 @@ function makeJsonData() {
         city: city.value,
         email: email.value
     };
-    if (!validInfo(firstName)) {
-        alert("le prénom n'est pas correctement remplis");
-        return;
-    } else if (!validInfo(lastName)) {
-        alert("le nom n'est pas correctement remplis");
-
-    } else if (!validInfo(city)) {
-        alert("la ville n'est pas correctement remplis");
-    }
-
     let items = productInLocalStorage;
     let products = [];
 
@@ -242,32 +239,27 @@ orderButton.addEventListener("click", (e) => {
 
     let jsonData = makeJsonData();
 
-    if (validInfo(firstName) && validInfo(lastName) && validInfo(city)) {
-        if (address.value === "" || email.value === "") {
-            alert("Veuillez remplir correctement le formulaire s'il vous plaît")
-            return false;
-        } else {
-            fetch(postUrl, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: jsonData,
-                })
-                .then((res) => res.json())
-                // to check res.ok status in the network
-                .then((data) => {
-                    // Si le formulaire n'est pas correctement rempli on envoie un message d'alerte
-
-                    // Sinon on renvoie sur la page confirmation, en passant orderID qui nous est retourné par le back dans l'url
-                    localStorage.clear();
-                    let confirmationUrl = "./confirmation.html?id=" + data.orderId;
-                    window.location.href = confirmationUrl;
-
-                })
-                .catch(() => {
-                    alert("Une erreur est survenue, merci de revenir plus tard.");
-                }); // catching errors
-        }
-    }
-})
+    fetch(postUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: jsonData,
+        })
+        .then((res) => res.json())
+        // to check res.ok status in the network
+        .then((data) => {
+            // Si le formulaire n'est pas correctement rempli on envoie un message d'alerte
+            if (firstName.value === "" || lastName.value === "" || address.value === "" || email.value === "" || city.value === "") {
+                alert("Veuillez remplir correctement le formulaire s'il vous plaît")
+            } else {
+                // Sinon on renvoie sur la page confirmation, en passant orderID qui nous est retourné par le back dans l'url
+                localStorage.clear();
+                let confirmationUrl = "./confirmation.html?id=" + data.orderId;
+                window.location.href = confirmationUrl;
+            }
+        })
+        .catch(() => {
+            alert("Une erreur est survenue, merci de revenir plus tard.");
+        }); // catching errors
+});

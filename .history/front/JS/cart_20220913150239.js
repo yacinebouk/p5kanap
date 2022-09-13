@@ -99,9 +99,12 @@ function innerHTML() {
 
 
                             })
+
+
                     }
                 })
         }
+
     }
 }
 
@@ -245,8 +248,11 @@ orderButton.addEventListener("click", (e) => {
     if (validInfo(firstName) && validInfo(lastName) && validInfo(city)) {
         if (address.value === "" || email.value === "") {
             alert("Veuillez remplir correctement le formulaire s'il vous plaît")
+
             return false;
+
         } else {
+
             fetch(postUrl, {
                     method: "POST",
                     headers: {
@@ -268,6 +274,8 @@ orderButton.addEventListener("click", (e) => {
                 .catch(() => {
                     alert("Une erreur est survenue, merci de revenir plus tard.");
                 }); // catching errors
+
+
         }
     }
 })

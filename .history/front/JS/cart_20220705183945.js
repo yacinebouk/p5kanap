@@ -16,18 +16,14 @@ function innerHTML() {
         //la deuxième boucle va au deuxième niveau
         //On récupère la couleur et la quantité
         for (let [color, quantity] of Object.entries(colors)) {
-            console.log(color)
             fetch("http://localhost:3000/api/products/" + id)
                 .then((response) => {
                     if (response.ok) {
-                        return response.json()
-                            //faire un return      response.json()
-                            //ferme le if, fermer then
+                        response.json()
                             .then((productData) => {
-                                console.log(productData)
+
                                 let item = document.querySelector("#cart__items")
-                                    // Insertion des éléments
-                                    // document.createelement
+                                // Insertion des éléments
                                 item.innerHTML += `<article class="cart__item" data-id ="${productData._id}" data-color="${color}">
                 <div class="cart__item__img">
                   <img src="${productData.imageUrl}" alt="Photographie d'un canapé">
@@ -48,7 +44,7 @@ function innerHTML() {
                     </div>
                   </div>
                 </div>
-                </article>`;
+                </article>`
                                 //Supprimer un produit du ls
                                 //deleteBtns renvoie un objet avec tous les éléments html sous forme de collection
                                 let deleteBtns = document.getElementsByClassName("deleteItem")
@@ -57,7 +53,7 @@ function innerHTML() {
                                 //Object.values nous permet d'établir un tableau pour pouvoir boucler sur les éléments
                                 Object.values(deleteBtns).forEach(deleteBtn => {
                                     // Au clic de deleteBtn on supprime le produit du ls
-                                    deleteBtn.addEventListener('click', function() {
+                                    deleteBtn.addEventListener('click', function () {
                                         //closest permet de récupérer l'article le plus proche du deleteBtn en question
                                         let article = deleteBtn.closest("article")
                                         let deleteBtnId = article.getAttribute("data-id")
@@ -75,7 +71,7 @@ function innerHTML() {
 
                                 //Object.values nous permet d'établir un tableau pour pouvoir boucler sur les éléments
                                 Object.values(quantityItem).forEach(qty => {
-                                    qty.addEventListener('change', function() {
+                                    qty.addEventListener('change', function () {
                                         let article = qty.closest("article")
                                         let idData = article.getAttribute("data-id")
                                         let idColor = article.getAttribute("data-color")
@@ -89,9 +85,9 @@ function innerHTML() {
 
                                 let totalQuantity = document.querySelector('#totalQuantity')
                                 let totalPrice = document.querySelector('#totalPrice')
-                                    // On additionne la quantité de chaque produit pour trouver le nombre d'articles
+                                // On additionne la quantité de chaque produit pour trouver le nombre d'articles
                                 cartTotalItems += parseInt(quantity)
-                                    // On multiplie pour chaque produit son prix par sa quantité, et on additionne
+                                // On multiplie pour chaque produit son prix par sa quantité, et on additionne
                                 cartTotalPrice += productData.price * parseInt(quantity)
 
                                 totalQuantity.innerHTML = cartTotalItems
@@ -99,9 +95,12 @@ function innerHTML() {
 
 
                             })
+
+
                     }
                 })
         }
+
     }
 }
 
@@ -117,13 +116,13 @@ innerHTML()
 let email = document.querySelector("#email")
 
 // Verification email value
-email.addEventListener("change", function() {
+email.addEventListener("change", function () {
 
     validEmail(this)
 
 });
 
-const validEmail = function(inputEmail) {
+const validEmail = function (inputEmail) {
     // On établit un regex pour les adresses mails
     let emailRegExp = new RegExp('^[a-zA-Z0-9.-_]{1,50}[@]{1}[a-zA-Z0-9.-_]{1,50}[.]{1}[a-z]{2,10}$', 'g')
 
@@ -152,42 +151,43 @@ let firstName = document.querySelector("#firstName")
 let city = document.querySelector("#city")
 let address = document.querySelector('#address')
 
-lastName.addEventListener("input", function() {
+lastName.addEventListener("input", function () {
 
     validInfo(this)
 
 });
 
-firstName.addEventListener("input", function() {
+firstName.addEventListener("input", function () {
 
     validInfo(this)
 
 });
 
-city.addEventListener("input", function() {
+city.addEventListener("input", function () {
 
     validInfo(this)
 
 });
 
 
-const validInfo = function(inputInfo) {
+const validInfo = function (inputInfo) {
     // On établit un regex pour les autres inputs
     let infoRegExp = new RegExp('^[a-zA-Z-_./]{0,100}$', 'g')
-        // On teste le regex
+    // On teste le regex
     let testInfo = infoRegExp.test(inputInfo.value)
     let errorMessage = inputInfo.nextElementSibling
 
-    //if (inputInfo.value === "") {
-    errorMessage.innerHTML = ""
-        //}
-    if (!testInfo || inputInfo.value.length < 1) {
+
+    if (inputInfo.value === "") {
+        errorMessage.innerHTML = ""
+
+    } else if (testInfo === false) {
         errorMessage.style.color = "FF8686E5"
         errorMessage.innerHTML = "❌ Nombre ou symbole non autorisé"
-        return false;
-    } else {
-        //errorMessage.innerHTML = ""
-        return true;
+
+    } else if (testInfo === true) {
+        errorMessage.innerHTML = ""
+
     }
 
 
@@ -206,16 +206,6 @@ function makeJsonData() {
         city: city.value,
         email: email.value
     };
-    if (!validInfo(firstName)) {
-        alert("le prénom n'est pas correctement remplis");
-        return;
-    } else if (!validInfo(lastName)) {
-        alert("le nom n'est pas correctement remplis");
-
-    } else if (!validInfo(city)) {
-        alert("la ville n'est pas correctement remplis");
-    }
-
     let items = productInLocalStorage;
     let products = [];
 
@@ -229,7 +219,7 @@ function makeJsonData() {
         }
     }
     // On crée l'objet que le backend attend
-    let dataJson = JSON.stringify({ contact, products });
+    let dataJson = JSON.stringify({contact, products});
 
     return dataJson;
 }
@@ -242,32 +232,48 @@ orderButton.addEventListener("click", (e) => {
 
     let jsonData = makeJsonData();
 
-    if (validInfo(firstName) && validInfo(lastName) && validInfo(city)) {
-        if (address.value === "" || email.value === "") {
-            alert("Veuillez remplir correctement le formulaire s'il vous plaît")
-            return false;
-        } else {
-            fetch(postUrl, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: jsonData,
-                })
-                .then((res) => res.json())
-                // to check res.ok status in the network
-                .then((data) => {
-                    // Si le formulaire n'est pas correctement rempli on envoie un message d'alerte
+    fetch(postUrl, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: jsonData,
+    })
+        .then((res) => res.json())
+        // to check res.ok status in the network
+        .then((data) => {
+            // Si le formulaire n'est pas correctement rempli on envoie un message d'alerte
+            if (firstName.value === "" || lastName.value === "" || address.value === "" || email.value === "" || city.value === "") {
+                alert("Veuillez remplir correctement le formulaire s'il vous plaît")
+            } else {
+                // Sinon on renvoie sur la page confirmation, en passant orderID qui nous est retourné par le back dans l'url
+                localStorage.clear();
+                let confirmationUrl = "./confirmation.html?id=" + data.orderId;
+                window.location.href = confirmationUrl;
+            }
+        })
+        .catch(() => {
+            alert("Une erreur est survenue, merci de revenir plus tard.");
+        }); // catching errors
+});
 
-                    // Sinon on renvoie sur la page confirmation, en passant orderID qui nous est retourné par le back dans l'url
-                    localStorage.clear();
-                    let confirmationUrl = "./confirmation.html?id=" + data.orderId;
-                    window.location.href = confirmationUrl;
 
-                })
-                .catch(() => {
-                    alert("Une erreur est survenue, merci de revenir plus tard.");
-                }); // catching errors
-        }
-    }
-})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

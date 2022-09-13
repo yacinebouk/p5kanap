@@ -99,9 +99,12 @@ function innerHTML() {
 
 
                             })
+
+
                     }
                 })
         }
+
     }
 }
 
@@ -175,13 +178,19 @@ const validInfo = function(inputInfo) {
     // On établit un regex pour les autres inputs
     let infoRegExp = new RegExp('^[a-zA-Z-_./]{0,100}$', 'g')
         // On teste le regex
+    console.log(typeof inputInfo, inputInfo)
+    if (inputInfo.postValidation) {
+        console.log('ok')
+    }
     let testInfo = infoRegExp.test(inputInfo.value)
     let errorMessage = inputInfo.nextElementSibling
 
+
     //if (inputInfo.value === "") {
     errorMessage.innerHTML = ""
-        //}
-    if (!testInfo || inputInfo.value.length < 1) {
+
+    //}
+    if (!testInfo) {
         errorMessage.style.color = "FF8686E5"
         errorMessage.innerHTML = "❌ Nombre ou symbole non autorisé"
         return false;
@@ -199,6 +208,11 @@ const validInfo = function(inputInfo) {
 // On crée la fonction qui nous permet de renvoyer un objet au backend, qui contient
 // Un tableau product et l'objet contact
 function makeJsonData() {
+    inputInfo.postValidation = true
+    if (!validInfo(inputInfo)) {
+        alert("le formlaire n'est pas correctement remplis");
+        return;
+    }
     let contact = {
         firstName: firstName.value,
         lastName: lastName.value,
@@ -206,16 +220,6 @@ function makeJsonData() {
         city: city.value,
         email: email.value
     };
-    if (!validInfo(firstName)) {
-        alert("le prénom n'est pas correctement remplis");
-        return;
-    } else if (!validInfo(lastName)) {
-        alert("le nom n'est pas correctement remplis");
-
-    } else if (!validInfo(city)) {
-        alert("la ville n'est pas correctement remplis");
-    }
-
     let items = productInLocalStorage;
     let products = [];
 
@@ -242,32 +246,27 @@ orderButton.addEventListener("click", (e) => {
 
     let jsonData = makeJsonData();
 
-    if (validInfo(firstName) && validInfo(lastName) && validInfo(city)) {
-        if (address.value === "" || email.value === "") {
-            alert("Veuillez remplir correctement le formulaire s'il vous plaît")
-            return false;
-        } else {
-            fetch(postUrl, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: jsonData,
-                })
-                .then((res) => res.json())
-                // to check res.ok status in the network
-                .then((data) => {
-                    // Si le formulaire n'est pas correctement rempli on envoie un message d'alerte
-
-                    // Sinon on renvoie sur la page confirmation, en passant orderID qui nous est retourné par le back dans l'url
-                    localStorage.clear();
-                    let confirmationUrl = "./confirmation.html?id=" + data.orderId;
-                    window.location.href = confirmationUrl;
-
-                })
-                .catch(() => {
-                    alert("Une erreur est survenue, merci de revenir plus tard.");
-                }); // catching errors
-        }
-    }
-})
+    fetch(postUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: jsonData,
+        })
+        .then((res) => res.json())
+        // to check res.ok status in the network
+        .then((data) => {
+            // Si le formulaire n'est pas correctement rempli on envoie un message d'alerte
+            if (firstName.value === "" || lastName.value === "" || address.value === "" || email.value === "" || city.value === "") {
+                alert("Veuillez remplir correctement le formulaire s'il vous plaît")
+            } else {
+                // Sinon on renvoie sur la page confirmation, en passant orderID qui nous est retourné par le back dans l'url
+                localStorage.clear();
+                let confirmationUrl = "./confirmation.html?id=" + data.orderId;
+                window.location.href = confirmationUrl;
+            }
+        })
+        .catch(() => {
+            alert("Une erreur est survenue, merci de revenir plus tard.");
+        }); // catching errors
+});

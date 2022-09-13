@@ -99,9 +99,12 @@ function innerHTML() {
 
 
                             })
+
+
                     }
                 })
         }
+
     }
 }
 
@@ -238,36 +241,39 @@ function makeJsonData() {
 const orderButton = document.getElementById("order");
 const postUrl = "http://localhost:3000/api/products/order";
 orderButton.addEventListener("click", (e) => {
-    e.preventDefault(); //prevent default form button action
+            e.preventDefault(); //prevent default form button action
 
-    let jsonData = makeJsonData();
+            let jsonData = makeJsonData();
 
-    if (validInfo(firstName) && validInfo(lastName) && validInfo(city)) {
-        if (address.value === "" || email.value === "") {
-            alert("Veuillez remplir correctement le formulaire s'il vous plaît")
-            return false;
-        } else {
-            fetch(postUrl, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: jsonData,
-                })
-                .then((res) => res.json())
-                // to check res.ok status in the network
-                .then((data) => {
-                    // Si le formulaire n'est pas correctement rempli on envoie un message d'alerte
+            if (validInfo(firstName) && validInfo(lastName) && validInfo(city)) {
+                if (address.value === "" || email.value === "") {
+                    alert("Veuillez remplir correctement le formulaire s'il vous plaît")
 
-                    // Sinon on renvoie sur la page confirmation, en passant orderID qui nous est retourné par le back dans l'url
-                    localStorage.clear();
-                    let confirmationUrl = "./confirmation.html?id=" + data.orderId;
-                    window.location.href = confirmationUrl;
+                    return false;
 
-                })
-                .catch(() => {
-                    alert("Une erreur est survenue, merci de revenir plus tard.");
-                }); // catching errors
-        }
-    }
-})
+                } else {
+
+                    fetch(postUrl, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: jsonData,
+                        })
+                        .then((res) => res.json())
+                        // to check res.ok status in the network
+                        .then((data) => {
+                            // Si le formulaire n'est pas correctement rempli on envoie un message d'alerte
+
+                            // Sinon on renvoie sur la page confirmation, en passant orderID qui nous est retourné par le back dans l'url
+                            localStorage.clear();
+                            let confirmationUrl = "./confirmation.html?id=" + data.orderId;
+                            window.location.href = confirmationUrl;
+
+                        })
+                        .catch(() => {
+                            alert("Une erreur est survenue, merci de revenir plus tard.");
+                        }); // catching errors
+                }
+
+            });
